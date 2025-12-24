@@ -1524,17 +1524,8 @@ function loadAuctionData(callback) {
         .then(function(r) { return r.json(); })
         .then(function(data) {
             generalAuctionData = data;
-
-            // Clusterer 생성 (마커는 나중에 동적으로 추가)
-            clusterers.general_auction = new kakao.maps.MarkerClusterer({
-                map: null,
-                averageCenter: true,
-                minLevel: 1,
-                markers: []
-            });
-
             generalAuctionLoaded = true;
-            console.log("경매 데이터 로드 완료:", data.length, "개 (초경량 모드)");
+            console.log("경매 데이터 로드 완료:", data.length, "개 (클러스터 없이 직접 표시)");
             callback();
         });
 }
@@ -1547,34 +1538,27 @@ function loadPublicData(callback) {
         .then(function(r) { return r.json(); })
         .then(function(data) {
             generalPublicData = data;
-
-            // Clusterer 생성 (마커는 나중에 동적으로 추가)
-            clusterers.general_public = new kakao.maps.MarkerClusterer({
-                map: null,
-                averageCenter: true,
-                minLevel: 1,
-                markers: []
-            });
-
             generalPublicLoaded = true;
-            console.log("공매 데이터 로드 완료:", data.length, "개 (초경량 모드)");
+            console.log("공매 데이터 로드 완료:", data.length, "개 (클러스터 없이 직접 표시)");
             callback();
         });
 }
 
-// 뷰포트 기반 마커 생성 (경매/공매용) - 최대 500개로 제한
+// 뷰포트 기반 마커 생성 (경매/공매용) - 클러스터 없이 직접 표시, 최대 1000개
 function updateAuctionMarkersInViewport() {
     var bounds = map.getBounds();
     var level = map.getLevel();
-    var maxMarkers = 500;  // 성능을 위해 최대 500개로 제한
+    var maxMarkers = 1000;  // 최대 1000개로 증가
+    var sw = bounds.getSouthWest();
+    var ne = bounds.getNorthEast();
 
-    // 경매 마커 업데이트
-    if (clusterers.general_auction && clusterers.general_auction.getMap()) {
-        var auctionMarkersToShow = [];
-        var sw = bounds.getSouthWest();
-        var ne = bounds.getNorthEast();
+    // 경매 마커 업데이트 (클러스터 없이 직접 표시)
+    if (document.getElementById('layer-general_auction').checked) {
+        // 기존 마커 제거
+        markers.general_auction.forEach(function(m) { m.setMap(null); });
+        markers.general_auction = [];
+
         var count = 0;
-
         for (var i = 0; i < generalAuctionData.length && count < maxMarkers; i++) {
             var d = generalAuctionData[i];
             if (d.lat >= sw.getLat() && d.lat <= ne.getLat() &&
@@ -1582,23 +1566,21 @@ function updateAuctionMarkersInViewport() {
                 var m = createMarkerNoMap(d.lat, d.lng, COLORS.general_auction, "general_auction");
                 var info = createAuctionInfo(d, "경매");
                 addClickEvent(m, info, d);
-                auctionMarkersToShow.push(m);
+                m.setMap(map);  // 직접 지도에 추가 (클러스터 없음)
+                markers.general_auction.push(m);
                 count++;
             }
         }
-
-        clusterers.general_auction.clear();
-        clusterers.general_auction.addMarkers(auctionMarkersToShow);
-        console.log("경매 마커 업데이트:", auctionMarkersToShow.length, "개 (줌 레벨: " + level + ")");
+        console.log("경매 마커 직접 표시:", markers.general_auction.length, "개 / 전체:", generalAuctionData.length, "개 (줌: " + level + ")");
     }
 
-    // 공매 마커 업데이트
-    if (clusterers.general_public && clusterers.general_public.getMap()) {
-        var publicMarkersToShow = [];
-        var sw = bounds.getSouthWest();
-        var ne = bounds.getNorthEast();
-        var count = 0;
+    // 공매 마커 업데이트 (클러스터 없이 직접 표시)
+    if (document.getElementById('layer-general_public').checked) {
+        // 기존 마커 제거
+        markers.general_public.forEach(function(m) { m.setMap(null); });
+        markers.general_public = [];
 
+        var count = 0;
         for (var i = 0; i < generalPublicData.length && count < maxMarkers; i++) {
             var d = generalPublicData[i];
             if (d.lat >= sw.getLat() && d.lat <= ne.getLat() &&
@@ -1606,14 +1588,12 @@ function updateAuctionMarkersInViewport() {
                 var m = createMarkerNoMap(d.lat, d.lng, COLORS.general_public, "general_public");
                 var info = createAuctionInfo(d, "공매");
                 addClickEvent(m, info, d);
-                publicMarkersToShow.push(m);
+                m.setMap(map);  // 직접 지도에 추가 (클러스터 없음)
+                markers.general_public.push(m);
                 count++;
             }
         }
-
-        clusterers.general_public.clear();
-        clusterers.general_public.addMarkers(publicMarkersToShow);
-        console.log("공매 마커 업데이트:", publicMarkersToShow.length, "개 (줌 레벨: " + level + ")");
+        console.log("공매 마커 직접 표시:", markers.general_public.length, "개 / 전체:", generalPublicData.length, "개 (줌: " + level + ")");
     }
 }
 
@@ -2122,24 +2102,19 @@ function toggleLayer(category) {
 
     console.log('toggleLayer 호출:', category, '표시:', show);
 
-    // 경매/공매는 lazy loading + 뷰포트 기반 렌더링
+    // 경매/공매는 lazy loading + 직접 마커 표시 (클러스터 없음)
     if (category === 'general_auction') {
         if (!generalAuctionLoaded && show) {
             console.log('경매 데이터 로딩 시작...');
             loadAuctionData(function() {
-                var chk = document.getElementById('layer-general_auction');
-                if (chk && chk.checked && clusterers.general_auction) {
-                    clusterers.general_auction.setMap(map);
-                    updateAuctionMarkersInViewport();  // 뷰포트 내 마커만 표시
-                }
+                updateAuctionMarkersInViewport();  // 클러스터 없이 직접 마커 표시
             });
-        } else if (clusterers.general_auction) {
+        } else if (generalAuctionLoaded) {
             if (show) {
-                clusterers.general_auction.setMap(map);
-                updateAuctionMarkersInViewport();  // 뷰포트 내 마커만 표시
+                updateAuctionMarkersInViewport();  // 클러스터 없이 직접 마커 표시
             } else {
-                clusterers.general_auction.clear();
-                clusterers.general_auction.setMap(null);
+                markers.general_auction.forEach(function(m) { m.setMap(null); });
+                markers.general_auction = [];
                 console.log('경매 레이어 숨김');
             }
         }
@@ -2150,19 +2125,14 @@ function toggleLayer(category) {
         if (!generalPublicLoaded && show) {
             console.log('공매 데이터 로딩 시작...');
             loadPublicData(function() {
-                var chk = document.getElementById('layer-general_public');
-                if (chk && chk.checked && clusterers.general_public) {
-                    clusterers.general_public.setMap(map);
-                    updateAuctionMarkersInViewport();  // 뷰포트 내 마커만 표시
-                }
+                updateAuctionMarkersInViewport();  // 클러스터 없이 직접 마커 표시
             });
-        } else if (clusterers.general_public) {
+        } else if (generalPublicLoaded) {
             if (show) {
-                clusterers.general_public.setMap(map);
-                updateAuctionMarkersInViewport();  // 뷰포트 내 마커만 표시
+                updateAuctionMarkersInViewport();  // 클러스터 없이 직접 마커 표시
             } else {
-                clusterers.general_public.clear();
-                clusterers.general_public.setMap(null);
+                markers.general_public.forEach(function(m) { m.setMap(null); });
+                markers.general_public = [];
                 console.log('공매 레이어 숨김');
             }
         }
