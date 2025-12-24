@@ -1523,8 +1523,8 @@ function loadAuctionData(callback) {
         .then(function(data) {
             console.log("경매 데이터 로드 완료:", data.length);
 
-            // 배치 처리로 마커 생성 (한 번에 500개씩)
-            var batchSize = 500;
+            // 배치 처리로 마커 생성 (한 번에 2000개씩 - 성능 최적화)
+            var batchSize = 2000;
             var index = 0;
 
             function processBatch() {
@@ -1547,7 +1547,7 @@ function loadAuctionData(callback) {
                     clusterers.general_auction = new kakao.maps.MarkerClusterer({
                         map: null,  // 초기에는 숨김
                         averageCenter: true,
-                        minLevel: 7,
+                        minLevel: 8,  // 더 적극적인 클러스터링
                         markers: markers.general_auction
                     });
                     generalAuctionLoaded = true;
@@ -1569,8 +1569,8 @@ function loadPublicData(callback) {
         .then(function(data) {
             console.log("공매 데이터 로드 완료:", data.length);
 
-            // 배치 처리로 마커 생성 (한 번에 500개씩)
-            var batchSize = 500;
+            // 배치 처리로 마커 생성 (한 번에 2000개씩 - 성능 최적화)
+            var batchSize = 2000;
             var index = 0;
 
             function processBatch() {
@@ -1593,7 +1593,7 @@ function loadPublicData(callback) {
                     clusterers.general_public = new kakao.maps.MarkerClusterer({
                         map: null,  // 초기에는 숨김
                         averageCenter: true,
-                        minLevel: 7,
+                        minLevel: 8,  // 더 적극적인 클러스터링
                         markers: markers.general_public
                     });
                     generalPublicLoaded = true;
