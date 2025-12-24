@@ -1779,7 +1779,11 @@ function init() {
         markers.public.push(m); auctionDataByMarker.set(m, d);
     });
 
-    // 토지보상구역 폴리곤
+    // 토지보상구역 폴리곤 - 공유 InfoWindow
+    var polygonInfowindow = new kakao.maps.InfoWindow({
+        removable: true
+    });
+
     DATA_proj.forEach(function(d) {
         if (!d.path || d.path.length < 3) return;
         var path = d.path.map(function(c) { return new kakao.maps.LatLng(c[0], c[1]); });
@@ -1791,34 +1795,37 @@ function init() {
             fillColor: '#f97316',
             fillOpacity: 0.12
         });
-        // 향상된 팝업 내용
+
+        // 폴리곤을 지도에 추가
+        poly.setMap(map);
+
+        // 팝업 데이터
         var name = d.name || '사업지구';
         var parcels = d.parcels || 0;
         var boundaryPoints = d.boundaryPoints || d.path.length;
 
-        // 팝업 HTML
-        var contentHtml = '<div style="padding:16px 20px;font-size:13px;max-width:320px;background:#1a1a1f;color:#fff;border-radius:10px;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 12px rgba(0,0,0,0.5)">' +
-            '<div style="font-weight:600;font-size:14px;margin-bottom:12px;color:#f97316;line-height:1.4">' + name + '</div>' +
-            '<div style="display:flex;flex-direction:column;gap:8px">' +
-            '<div style="display:flex;align-items:center;gap:8px;color:#cbd5e1">' +
-            '<span style="width:20px;text-align:center">📍</span>' +
-            '<span style="font-size:12px">토지 필지: <strong style="color:#fff">' + parcels.toLocaleString() + '개</strong></span>' +
-            '</div>' +
-            '<div style="display:flex;align-items:center;gap:8px;color:#cbd5e1">' +
-            '<span style="width:20px;text-align:center">🔷</span>' +
-            '<span style="font-size:12px">경계 점: <strong style="color:#fff">' + boundaryPoints.toLocaleString() + '개</strong></span>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-
-        var infowindow = new kakao.maps.InfoWindow({
-            content: contentHtml,
-            removable: true
-        });
-
+        // 클릭 이벤트
         kakao.maps.event.addListener(poly, 'click', function(mouseEvent) {
-            infowindow.open(map, mouseEvent.latLng);
+            // 팝업 HTML
+            var contentHtml = '<div style="padding:16px 20px;font-size:13px;max-width:320px;background:#1a1a1f;color:#fff;border-radius:10px;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 12px rgba(0,0,0,0.5)">' +
+                '<div style="font-weight:600;font-size:14px;margin-bottom:12px;color:#f97316;line-height:1.4">' + name + '</div>' +
+                '<div style="display:flex;flex-direction:column;gap:8px">' +
+                '<div style="display:flex;align-items:center;gap:8px;color:#cbd5e1">' +
+                '<span style="width:20px;text-align:center">📍</span>' +
+                '<span style="font-size:12px">토지 필지: <strong style="color:#fff">' + parcels.toLocaleString() + '개</strong></span>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;color:#cbd5e1">' +
+                '<span style="width:20px;text-align:center">🔷</span>' +
+                '<span style="font-size:12px">경계 점: <strong style="color:#fff">' + boundaryPoints.toLocaleString() + '개</strong></span>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+            polygonInfowindow.setContent(contentHtml);
+            polygonInfowindow.setPosition(mouseEvent.latLng);
+            polygonInfowindow.open(map);
         });
+
         markers.land.push(poly);
     });
 
