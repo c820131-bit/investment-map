@@ -1523,8 +1523,8 @@ function loadAuctionData(callback) {
         .then(function(data) {
             console.log("경매 데이터 로드 완료:", data.length);
 
-            // 배치 처리로 마커 생성 (한 번에 2000개씩 - 성능 최적화)
-            var batchSize = 2000;
+            // 배치 처리로 마커 생성 (한 번에 5000개씩 - 성능 최적화)
+            var batchSize = 5000;
             var index = 0;
 
             function processBatch() {
@@ -1547,7 +1547,7 @@ function loadAuctionData(callback) {
                     clusterers.general_auction = new kakao.maps.MarkerClusterer({
                         map: null,  // 초기에는 숨김
                         averageCenter: true,
-                        minLevel: 8,  // 더 적극적인 클러스터링
+                        minLevel: 10,  // 더 적극적인 클러스터링 (8 → 10)
                         markers: markers.general_auction
                     });
                     generalAuctionLoaded = true;
@@ -1569,8 +1569,8 @@ function loadPublicData(callback) {
         .then(function(data) {
             console.log("공매 데이터 로드 완료:", data.length);
 
-            // 배치 처리로 마커 생성 (한 번에 2000개씩 - 성능 최적화)
-            var batchSize = 2000;
+            // 배치 처리로 마커 생성 (한 번에 5000개씩 - 성능 최적화)
+            var batchSize = 5000;
             var index = 0;
 
             function processBatch() {
@@ -1593,7 +1593,7 @@ function loadPublicData(callback) {
                     clusterers.general_public = new kakao.maps.MarkerClusterer({
                         map: null,  // 초기에는 숨김
                         averageCenter: true,
-                        minLevel: 8,  // 더 적극적인 클러스터링
+                        minLevel: 10,  // 더 적극적인 클러스터링 (8 → 10)
                         markers: markers.general_public
                     });
                     generalPublicLoaded = true;
@@ -1952,7 +1952,7 @@ function init() {
 
 // 맵에 추가하지 않는 마커 생성 (클러스터러용)
 function createMarkerNoMap(lat, lng, color, type) {
-    var size = type === 'auction' || type === 'public' ? 8 : 10;
+    var size = type === 'auction' || type === 'public' ? 8 : 5;  // 사업지구 마커 크기 축소 (10 → 5)
     var img = new kakao.maps.MarkerImage(
         'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + (size*2) + '" height="' + (size*2) + '"><circle cx="' + size + '" cy="' + size + '" r="' + (size-1) + '" fill="' + color + '" stroke="#fff" stroke-width="1.5"/></svg>'),
         new kakao.maps.Size(size*2, size*2),
