@@ -1547,7 +1547,7 @@ function loadAuctionData(callback) {
                     clusterers.general_auction = new kakao.maps.MarkerClusterer({
                         map: null,  // 초기에는 숨김
                         averageCenter: true,
-                        minLevel: 10,  // 더 적극적인 클러스터링 (8 → 10)
+                        minLevel: 1,  // 거의 클러스터링 안함 (바로 마커 표시)
                         markers: markers.general_auction
                     });
                     generalAuctionLoaded = true;
@@ -1593,7 +1593,7 @@ function loadPublicData(callback) {
                     clusterers.general_public = new kakao.maps.MarkerClusterer({
                         map: null,  // 초기에는 숨김
                         averageCenter: true,
-                        minLevel: 10,  // 더 적극적인 클러스터링 (8 → 10)
+                        minLevel: 1,  // 거의 클러스터링 안함 (바로 마커 표시)
                         markers: markers.general_public
                     });
                     generalPublicLoaded = true;
@@ -2115,14 +2115,23 @@ function toggleLayer(category) {
                 // 로딩 완료 후 체크박스가 여전히 체크되어 있으면 Clusterer 표시
                 var chk = document.getElementById('layer-general_auction');
                 if (chk && chk.checked && clusterers.general_auction) {
-                    clusterers.general_auction.setMap(map);
-                    console.log('경매 Clusterer 표시 완료:', markers.general_auction.length);
+                    setTimeout(function() {
+                        clusterers.general_auction.setMap(map);
+                        console.log('경매 Clusterer 표시 완료:', markers.general_auction.length);
+                    }, 0);
                 }
             });
         } else if (clusterers.general_auction) {
             // 이미 로드됨 - Clusterer 토글
-            clusterers.general_auction.setMap(show ? map : null);
-            console.log('경매 Clusterer 토글:', show, '마커 수:', markers.general_auction.length);
+            if (show) {
+                setTimeout(function() {
+                    clusterers.general_auction.setMap(map);
+                    console.log('경매 Clusterer 표시:', markers.general_auction.length);
+                }, 0);
+            } else {
+                clusterers.general_auction.setMap(null);
+                console.log('경매 Clusterer 숨김');
+            }
         }
         return;
     }
@@ -2134,14 +2143,23 @@ function toggleLayer(category) {
                 // 로딩 완료 후 체크박스가 여전히 체크되어 있으면 Clusterer 표시
                 var chk = document.getElementById('layer-general_public');
                 if (chk && chk.checked && clusterers.general_public) {
-                    clusterers.general_public.setMap(map);
-                    console.log('공매 Clusterer 표시 완료:', markers.general_public.length);
+                    setTimeout(function() {
+                        clusterers.general_public.setMap(map);
+                        console.log('공매 Clusterer 표시 완료:', markers.general_public.length);
+                    }, 0);
                 }
             });
         } else if (clusterers.general_public) {
             // 이미 로드됨 - Clusterer 토글
-            clusterers.general_public.setMap(show ? map : null);
-            console.log('공매 Clusterer 토글:', show, '마커 수:', markers.general_public.length);
+            if (show) {
+                setTimeout(function() {
+                    clusterers.general_public.setMap(map);
+                    console.log('공매 Clusterer 표시:', markers.general_public.length);
+                }, 0);
+            } else {
+                clusterers.general_public.setMap(null);
+                console.log('공매 Clusterer 숨김');
+            }
         }
         return;
     }
