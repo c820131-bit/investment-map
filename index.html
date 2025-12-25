@@ -2096,22 +2096,10 @@ function toggleLayer(category) {
 function setMapType(type) {
     var mapTypes = {
         'roadmap': kakao.maps.MapTypeId.ROADMAP,
-        'skyview': kakao.maps.MapTypeId.SKYVIEW
+        'skyview': kakao.maps.MapTypeId.HYBRID
     };
-    
-    // 스카이뷰 선택 시 지적도 오버레이 자동 해제
-    if (type === 'skyview' && cadastralOn) {
-        map.removeOverlayMapTypeId(kakao.maps.MapTypeId.USE_DISTRICT);
-        cadastralOn = false;
-        var cadastralBtn = document.querySelector('.map-type-btn[onclick*="toggleCadastral"]');
-        if (cadastralBtn) cadastralBtn.classList.remove('active');
-    }
-    
     map.setMapTypeId(mapTypes[type]);
-    
-    // 일반/스카이뷰 버튼만 토글
-    var btns = document.querySelectorAll('.map-type-btn[onclick*="setMapType"]');
-    btns.forEach(function(btn) {
+    document.querySelectorAll('.map-type-btn').forEach(function(btn) {
         btn.classList.remove('active');
     });
     event.target.classList.add('active');
