@@ -1919,11 +1919,34 @@ function init() {
 
 // 맵에 추가하지 않는 마커 생성 (클러스터러용)
 function createMarkerNoMap(lat, lng, color, type) {
-    var size = type === 'auction' || type === 'public' || type === 'general_auction' || type === 'general_public' || type === 'exact_match' || type === 'nearby_500m' ? 12 : 5;
+    var svg, size;
+
+    if (type === 'general_auction') {
+        // 경매: (경) 텍스트
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="' + color + '" stroke="#fff" stroke-width="2"/><text x="12" y="16" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle" font-family="sans-serif">경</text></svg>';
+        size = 24;
+    } else if (type === 'general_public') {
+        // 공매: (공) 텍스트
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="' + color + '" stroke="#fff" stroke-width="2"/><text x="12" y="16" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle" font-family="sans-serif">공</text></svg>';
+        size = 24;
+    } else if (type === 'exact_match') {
+        // 완전일치: ⭐
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><text x="11" y="17" font-size="18" text-anchor="middle">⭐</text></svg>';
+        size = 22;
+    } else if (type === 'nearby_500m') {
+        // 500m 이내: 원형
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="8" fill="' + color + '" stroke="#fff" stroke-width="2"/></svg>';
+        size = 20;
+    } else {
+        // 기타: 작은 원형
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><circle cx="6" cy="6" r="5" fill="' + color + '" stroke="#fff" stroke-width="1"/></svg>';
+        size = 12;
+    }
+
     var img = new kakao.maps.MarkerImage(
-        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + (size*2+4) + '" height="' + (size*2+4) + '"><defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.4"/></filter></defs><circle cx="' + (size+2) + '" cy="' + (size+2) + '" r="' + size + '" fill="' + color + '" stroke="#fff" stroke-width="3" filter="url(#shadow)"/></svg>'),
-        new kakao.maps.Size(size*2+4, size*2+4),
-        { offset: new kakao.maps.Point(size+2, size+2) }
+        'data:image/svg+xml,' + encodeURIComponent(svg),
+        new kakao.maps.Size(size, size),
+        { offset: new kakao.maps.Point(size/2, size/2) }
     );
     return new kakao.maps.Marker({
         position: new kakao.maps.LatLng(lat, lng),
