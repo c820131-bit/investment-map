@@ -1981,6 +1981,10 @@ function createMarker(lat, lng, color, type) {
     } else if (type === 'public') {
         svg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"><circle cx="7" cy="7" r="6" fill="' + color + '" stroke="white" stroke-width="1"/><text x="7" y="11" font-size="8" font-weight="bold" fill="white" text-anchor="middle" font-family="sans-serif">공</text></svg>');
         size = 14;
+    } else if (type === 'exact_match') {
+        // 완전일치: (완) 텍스트
+        svg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><circle cx="8" cy="8" r="7" fill="' + color + '" stroke="white" stroke-width="1"/><text x="8" y="11" font-size="8" font-weight="bold" fill="white" text-anchor="middle" font-family="sans-serif">완</text></svg>');
+        size = 16;
     } else {
         svg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="4" fill="' + color + '" stroke="white" stroke-width="1"/></svg>');
         size = 10;
