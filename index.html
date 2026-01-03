@@ -622,6 +622,20 @@
                 <span class="layer-name">개발예정지</span>
                 <span class="layer-count">361</span>
             </label>
+            <label class="layer-item">
+                <input type="checkbox" id="layer-auction" onchange="toggleLayer('auction')">
+                <div class="toggle"></div>
+                <div class="layer-color" style="background: #ef4444; color: #ef4444;"></div>
+                <span class="layer-name">경매</span>
+                <span class="layer-count" id="count-auction">0</span>
+            </label>
+            <label class="layer-item">
+                <input type="checkbox" id="layer-public" onchange="toggleLayer('public')">
+                <div class="toggle"></div>
+                <div class="layer-color" style="background: #a855f7; color: #a855f7;"></div>
+                <span class="layer-name">공매</span>
+                <span class="layer-count" id="count-public">0</span>
+            </label>
         </div>
         <div class="layer-group">
             <div class="layer-title">옥션 정환 매칭</div>
@@ -1927,21 +1941,35 @@ function init() {
         m.setMap(map);
     });
 
-    // 경매
-    DATA_auction.forEach(function(d) {
-        var m = createMarkerNoMap(d.lat, d.lng, COLORS.auction, 'auction');
-        var info = createAuctionInfo(d, '경매');
-        addClickEvent(m, info, d);
-        markers.auction.push(m); auctionDataByMarker.set(m, d);
-    });
+    // 경매 데이터 로드
+    fetch("data_auction.json?v=202601031500")
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function(data) {
+            console.log("경매 데이터 로드 완료:", data.length);
+            data.forEach(function(d) {
+                var m = createMarkerNoMap(d.lat, d.lng, COLORS.auction, 'auction');
+                var info = createAuctionInfo(d, '경매');
+                addClickEvent(m, info, d);
+                markers.auction.push(m); auctionDataByMarker.set(m, d);
+            });
+            document.getElementById('count-auction').textContent = markers.auction.length.toLocaleString();
+            auctionLoaded = true;
+        }).catch(function(e) { console.error("경매 로드 실패:", e); });
 
-    // 공매
-    DATA_public.forEach(function(d) {
-        var m = createMarkerNoMap(d.lat, d.lng, COLORS.public, 'public');
-        var info = createAuctionInfo(d, '공매');
-        addClickEvent(m, info, d);
-        markers.public.push(m); auctionDataByMarker.set(m, d);
-    });
+    // 공매 데이터 로드
+    fetch("data_public.json?v=202601031500")
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function(data) {
+            console.log("공매 데이터 로드 완료:", data.length);
+            data.forEach(function(d) {
+                var m = createMarkerNoMap(d.lat, d.lng, COLORS.public, 'public');
+                var info = createAuctionInfo(d, '공매');
+                addClickEvent(m, info, d);
+                markers.public.push(m); auctionDataByMarker.set(m, d);
+            });
+            document.getElementById('count-public').textContent = markers.public.length.toLocaleString();
+            publicLoaded = true;
+        }).catch(function(e) { console.error("공매 로드 실패:", e); });
 
     // 토지보상구역 폴리곤 데이터 로드 및 렌더링
     fetch("data_proj.json?v=202601031400")
