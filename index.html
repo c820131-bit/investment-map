@@ -1966,8 +1966,8 @@ function init() {
                     fillOpacity: 0.12
                 });
 
-                // 폴리곤을 지도에 추가
-                poly.setMap(map);
+                // 폴리곤을 지도에 추가 (체크박스가 unchecked이므로 처음엔 숨김)
+                poly.setMap(null);
 
                 // 팝업 데이터
                 var name = d.name || '사업지구';
