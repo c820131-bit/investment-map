@@ -679,7 +679,7 @@
         <div class="stat-item"><span class="stat-label">완전일치</span><span class="stat-value highlight" id="stat-exact">0</span></div>
         <div class="stat-item"><span class="stat-label">500m이내</span><span class="stat-value" id="stat-500m">0</span></div>
         <div class="stat-item"><span class="stat-label">1km이내</span><span class="stat-value" id="stat-1km">0</span></div>
-        <div class="stat-item"><span class="stat-label">사업지구</span><span class="stat-value">740</span></div>
+        <div class="stat-item"><span class="stat-label">사업지구</span><span class="stat-value">776</span></div>
     </div>
 
     <div class="legend">
@@ -1943,7 +1943,7 @@ function init() {
     });
 
     // 토지보상구역 폴리곤 데이터 로드 및 렌더링
-    fetch("data_proj.json?v=202601022124")
+    fetch("data_proj.json?v=202601031200")
         .then(function(r) { return r.json(); })
         .then(function(projData) {
             console.log("폴리곤 데이터 로드 완료:", projData.length);
