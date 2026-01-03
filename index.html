@@ -1498,12 +1498,12 @@ var publicLoaded = false;
 
 // 완전일치 데이터 로드 함수
 var exactLoaded = false;
-var polygons = { exact: [], nearby500: [] };
+var polygons = { exact: [], nearby500: [], nearby1km: [] };
 function loadExactMatchData(callback) {
     if (exactLoaded) { if(callback) callback(); return; }
     console.log("완전일치 폴리곤 데이터 로딩...");
 
-    fetch("data_exact_polygons.json")
+    fetch("data_exact_polygons.json?v=202601031600")
         .then(function(r) {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.json();
@@ -1590,7 +1590,7 @@ function loadNearby500Data(callback) {
     if (nearby500Loaded) { if(callback) callback(); return; }
     console.log("500m 이내 폴리곤 데이터 로딩...");
 
-    fetch("data_nearby500_polygons.json")
+    fetch("data_nearby500_polygons.json?v=202601031600")
         .then(function(r) {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.json();
@@ -1670,25 +1670,55 @@ function loadNearby500Data(callback) {
         });
 }
 
-// 1km 이내 데이터 로드 함수
+// 1km 이내 폴리곤 데이터 로드 함수
 var nearby1kmLoaded = false;
 function loadNearby1kmData(callback) {
     if (nearby1kmLoaded) { if(callback) callback(); return; }
-    console.log("1km 이내 데이터 로딩...");
-    fetch("data_nearby_1km.json")
-        .then(function(r) { return r.json(); })
+    console.log("1km 이내 폴리곤 데이터 로딩...");
+
+    fetch("data_nearby1km_polygons.json?v=202601031600")
+        .then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
         .then(function(data) {
-            console.log("1km 이내 데이터 로드 완료:", data.length);
+            console.log("1km 이내 폴리곤 로드 완료:", data.length);
             data.forEach(function(d) {
-                var m = createMarkerNoMap(d.lat, d.lng, '#fb923c', "nearby1km");
-                var info = createAuctionInfo(d, "1km이내");
-                addClickEvent(m, info, d);
+                if (!d.polygon || d.polygon.length < 3) return;
+                var path = d.polygon.map(function(c) {
+                    return new kakao.maps.LatLng(c[1], c[0]);
+                });
+                var poly = new kakao.maps.Polygon({
+                    path: path,
+                    strokeWeight: 2,
+                    strokeColor: '#fb923c',
+                    strokeOpacity: 0.9,
+                    fillColor: '#fb923c',
+                    fillOpacity: 0.25
+                });
+                polygons.nearby1km.push(poly);
+
+                // 마커도 생성
+                var center = path[0];
+                var m = createMarkerNoMap(center.getLat(), center.getLng(), '#fb923c', 'nearby1km');
+                var info = createPolygonAuctionInfo(d, '1km이내');
+                kakao.maps.event.addListener(poly, 'click', function() {
+                    polygonInfowindow.setContent(info);
+                    polygonInfowindow.setPosition(center);
+                    polygonInfowindow.open(map);
+                });
+                kakao.maps.event.addListener(m, 'click', function() {
+                    polygonInfowindow.setContent(info);
+                    polygonInfowindow.setPosition(m.getPosition());
+                    polygonInfowindow.open(map);
+                });
                 markers.nearby1km.push(m);
             });
             nearby1kmLoaded = true;
-            document.getElementById('count-nearby1km').textContent = data.length.toLocaleString();
+            document.getElementById('count-nearby1km').textContent = polygons.nearby1km.length.toLocaleString();
             if(callback) callback();
-        });
+        })
+        .catch(function(e) { console.error("1km 로드 실패:", e); });
 }
 
 // [삭제됨] 경매 데이터 로드 함수
@@ -2185,12 +2215,13 @@ function toggleLayer(category) {
     // 1km 이내 lazy loading
     if (category === 'nearby1km' && show && !nearby1kmLoaded) {
         loadNearby1kmData(function() {
+            polygons.nearby1km.forEach(function(p) { p.setMap(map); });
             markers.nearby1km.forEach(function(m) { m.setMap(map); });
         });
         return;
     }
 
-    // 완전일치/500m는 polygons + markers 함께 사용
+    // 완전일치/500m/1km는 polygons + markers 함께 사용
     if (category === 'exact' && exactLoaded) {
         polygons.exact.forEach(function(p) { p.setMap(show ? map : null); });
         markers.exact.forEach(function(m) { m.setMap(show ? map : null); });
@@ -2199,6 +2230,11 @@ function toggleLayer(category) {
     if (category === 'nearby500' && nearby500Loaded) {
         polygons.nearby500.forEach(function(p) { p.setMap(show ? map : null); });
         markers.nearby500.forEach(function(m) { m.setMap(show ? map : null); });
+        return;
+    }
+    if (category === 'nearby1km' && nearby1kmLoaded) {
+        polygons.nearby1km.forEach(function(p) { p.setMap(show ? map : null); });
+        markers.nearby1km.forEach(function(m) { m.setMap(show ? map : null); });
         return;
     }
 
