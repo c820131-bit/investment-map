@@ -2226,9 +2226,9 @@ function zoomOut() { map.setLevel(map.getLevel() + 1); }
 // 빠른 줌 (한 번에 특정 레벨로 이동)
 function quickZoom(type) {
     if (type === 'in') {
-        map.setLevel(4);  // 확대: 레벨 4 (약 250m)
+        map.setLevel(6);  // 확대: 레벨 6 (약 1km)
     } else {
-        map.setLevel(10); // 축소: 레벨 10 (약 8km)
+        map.setLevel(11); // 축소: 레벨 11 (약 16km)
     }
 }
 
