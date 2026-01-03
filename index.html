@@ -1999,7 +1999,7 @@ function init() {
                 markers.land.push(poly);
             });
             
-            console.log("폴리곤 렌더링 완료:", DATA_proj.length);
+            console.log("폴리곤 렌더링 완료:", DATA_proj.length, "markers.land:", markers.land.length);
         })
         .catch(function(err) {
             console.error("폴리곤 데이터 로드 실패:", err);
@@ -2196,6 +2196,7 @@ function showParcel(lat, lng, address, areaInfo) {
 function toggleLayer(category) {
     var chk = document.getElementById('layer-' + category);
     var show = chk.checked;
+    console.log('toggleLayer:', category, 'show:', show, 'markers:', markers[category] ? markers[category].length : 0);
 
     // 완전일치 lazy loading
     if (category === 'exact' && show && !exactLoaded) {
