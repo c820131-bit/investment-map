@@ -605,6 +605,13 @@
                 <span class="layer-name">IC진출입로</span>
                 <span class="layer-count">47</span>
             </label>
+            <label class="layer-item">
+                <input type="checkbox" id="layer-development" onchange="toggleLayer('development')">
+                <div class="toggle"></div>
+                <div class="layer-color" style="background: #22c55e; color: #22c55e;"></div>
+                <span class="layer-name">개발예정지</span>
+                <span class="layer-count">361</span>
+            </label>
         </div>
         <div class="layer-group">
             <div class="layer-title">Development</div>
@@ -616,22 +623,15 @@
                 <span class="layer-count">30</span>
             </label>
             <label class="layer-item">
-                <input type="checkbox" id="layer-development" onchange="toggleLayer('development')">
-                <div class="toggle"></div>
-                <div class="layer-color" style="background: #22c55e; color: #22c55e;"></div>
-                <span class="layer-name">개발예정지</span>
-                <span class="layer-count">361</span>
-            </label>
-        </div>
-        <div class="layer-group">
-            <div class="layer-title">옥션 정환 매칭</div>
-            <label class="layer-item">
                 <input type="checkbox" id="layer-exact" checked onchange="toggleLayer('exact')">
                 <div class="toggle"></div>
                 <div class="layer-color" style="background: #ef4444; color: #ef4444;"></div>
                 <span class="layer-name">완전일치</span>
                 <span class="layer-count" id="count-exact" style="background:#ef4444;color:#fff">0</span>
             </label>
+        </div>
+        <div class="layer-group">
+            <div class="layer-title">인근거리</div>
             <label class="layer-item" style="background:linear-gradient(90deg,#fbbf24 0%,#f59e0b 100%)">
                 <input type="checkbox" id="layer-nearby500" onchange="toggleLayer('nearby500')">
                 <div class="toggle"></div>
