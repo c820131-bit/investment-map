@@ -1854,6 +1854,12 @@ function init() {
         lastClickPosition = mouseEvent.latLng;
     });
 
+    // 줌 변경 시 경공매 표시 여부 업데이트
+    kakao.maps.event.addListener(map, 'zoom_changed', function() {
+        updateAuctionVisibility();
+        updatePublicVisibility();
+    });
+
     // 철도
     DATA_rail.forEach(function(d) {
         var m = createMarker(d.lat, d.lng, COLORS.railway, 'rail');
@@ -2003,9 +2009,10 @@ function init() {
 
 // 맵에 추가하지 않는 마커 생성 (클러스터러용)
 function createMarkerNoMap(lat, lng, color, type) {
-    var size = type === 'auction' || type === 'public' ? 8 : 10;
+    var size = type === 'auction' || type === 'public' ? 4 : 10;  // 경공매는 작은 점 (4px)
+    var strokeWidth = type === 'auction' || type === 'public' ? 0.5 : 1.5;
     var img = new kakao.maps.MarkerImage(
-        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + (size*2) + '" height="' + (size*2) + '"><circle cx="' + size + '" cy="' + size + '" r="' + (size-1) + '" fill="' + color + '" stroke="#fff" stroke-width="1.5"/></svg>'),
+        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + (size*2) + '" height="' + (size*2) + '"><circle cx="' + size + '" cy="' + size + '" r="' + (size-1) + '" fill="' + color + '" stroke="#fff" stroke-width="' + strokeWidth + '"/></svg>'),
         new kakao.maps.Size(size*2, size*2),
         { offset: new kakao.maps.Point(size, size) }
     );
@@ -2174,21 +2181,33 @@ function toggleLayer(category) {
         });
         return;
     }
-    // 경매 lazy loading
-    if (category === 'auction' && show && !auctionLoaded) {
-        loadAuctionData(function() {
-            if (clusterers.auction) clusterers.auction.setMap(map);
-            document.getElementById('count-auction').textContent = markers.auction.length.toLocaleString();
-        });
-        return;
+    // 경매 lazy loading (줌 레벨 9 이하에서만 표시)
+    if (category === 'auction') {
+        if (show && !auctionLoaded) {
+            loadAuctionData(function() {
+                updateAuctionVisibility();
+                document.getElementById('count-auction').textContent = markers.auction.length.toLocaleString();
+            });
+            return;
+        }
+        if (auctionLoaded) {
+            updateAuctionVisibility();
+            return;
+        }
     }
-    // 공매 lazy loading
-    if (category === 'public' && show && !publicLoaded) {
-        loadPublicData(function() {
-            if (clusterers.public) clusterers.public.setMap(map);
-            document.getElementById('count-public').textContent = markers.public.length.toLocaleString();
-        });
-        return;
+    // 공매 lazy loading (줌 레벨 9 이하에서만 표시)
+    if (category === 'public') {
+        if (show && !publicLoaded) {
+            loadPublicData(function() {
+                updatePublicVisibility();
+                document.getElementById('count-public').textContent = markers.public.length.toLocaleString();
+            });
+            return;
+        }
+        if (publicLoaded) {
+            updatePublicVisibility();
+            return;
+        }
     }
 
     // 완전일치: 마커만 사용 (토지목록좌표 기반으로 사업지구 안에 표시)
@@ -2212,6 +2231,33 @@ function toggleLayer(category) {
         markers[category].forEach(function(m) {
             m.setMap(show ? map : null);
         });
+    }
+}
+
+// 경매/공매 줌 레벨 제한 (레벨 9 이하 = 확대 시에만 표시)
+var AUCTION_MIN_ZOOM = 9;
+
+function updateAuctionVisibility() {
+    var chk = document.getElementById('layer-auction');
+    var show = chk && chk.checked;
+    var level = map.getLevel();
+
+    if (show && level <= AUCTION_MIN_ZOOM && clusterers.auction) {
+        clusterers.auction.setMap(map);
+    } else if (clusterers.auction) {
+        clusterers.auction.setMap(null);
+    }
+}
+
+function updatePublicVisibility() {
+    var chk = document.getElementById('layer-public');
+    var show = chk && chk.checked;
+    var level = map.getLevel();
+
+    if (show && level <= AUCTION_MIN_ZOOM && clusterers.public) {
+        clusterers.public.setMap(map);
+    } else if (clusterers.public) {
+        clusterers.public.setMap(null);
     }
 }
 
